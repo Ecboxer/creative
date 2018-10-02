@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta charset="utf-8">
+	<title>Creative Class Demographics</title>
+	<script src="d3/d3.js" charset="utf-8"></script>
+    </head>
+    <body>
+	<script type="text/javascript">
+
+	 var margin = {top: 10, right: 10, bottom: 10, left: 10};
+	 var width = 1000 - margin.left - margin.right;
+	 var height = 600 - margin.top - margin.bottom;
+
+	 d3.csv("resources/ccShare.csv", function (d) {
+	     return { code: d.FIPS,
+		      state: d.state,
+		      stateAb: d.stateAbr,
+		      county: d.county,
+		      metro: d.metro,
+		      totEmp: d.totEmp,
+		      ccShare: d.ccShare
+	     };
+	 }).then(function (data) {
+
+	     //Total employment on x axis
+	     var xScale = d3.scalePow()
+			    .exponent(1)
+			    .domain([0, d3.max(data, function (d) { return d.totEmp; })])
+			    .range([0, width]);
+
+	     //Creative class share on y axis
+	     var yScale = d3.scaleLinear()
+			    .domain([0, d3.max(data, function (d) { return d.ccShare; })])
+			    .range([height, 0]);
+
+	     var container = d3.select("body")
+			       .append("svg")
+			       .attr("width", width + margin.left + margin.right)
+			       .attr("height", height + margin.top + margin.bottom)
+			       .append("g")
+			       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+	     var circle = container.selectAll("circle")
+				   .data(data)
+				   .enter()
+				   .append("circle")
+				   .attr("cx", function (d) { return xScale(d.totEmp); })
+				   .attr("cy", function (d) { return yScale(d.ccShare); })
+				   .attr("r", 5)
+				   .style("fill", "orange")
+				   .style("opacity", .3)
+				   .append("title")
+				   .text(function (d) {
+				       return d.county + ", " + d.stateAb + "\n" + d.totEmp + "\n" + d.ccShare;
+				   });
+	     
+	 });
+	 
+	</script>
+    </body>
+</html>
